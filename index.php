@@ -35,13 +35,19 @@ include 'header.php';
                         <li class="nav-item">
                             <a class="nav-link" href="bus-list.php">
                                 <span data-feather="bar-chart-2"></span>
-                                <span>Bus List </span>
+                                <span>Buses List </span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#">
                                 <span data-feather="layers"></span>
                                 <span>Settings</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="ticket.php">
+                                <span data-feather="layers"></span>
+                                <span>Ticket</span>
                             </a>
                         </li>
                     </ul>

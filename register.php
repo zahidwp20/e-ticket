@@ -30,7 +30,7 @@ if ($form_submission == 'yes') {
 
     if(empty($errors)){
         $ret = eticket_user_registration($firstname,$lastname,$username,$email_address,$password,$phonenumber);
-       if(is_int($ret)){
+       if(!is_int($ret)){
            $errors[] = $ret;
        }else{
            header('Location: login.php');
