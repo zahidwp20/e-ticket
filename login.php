@@ -20,9 +20,7 @@ if($form_submission === 'yes'){
         header('Location: index.php');
     }
     
-    echo "<pre>"; var_dump( $username ); echo "</pre>";
-    echo "<pre>"; var_dump( $password ); echo "</pre>";
-    echo "<pre>"; var_dump( eticket_login($username, $password) ); echo "</pre>";
+
 }
 
 ?>

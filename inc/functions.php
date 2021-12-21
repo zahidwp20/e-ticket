@@ -48,6 +48,28 @@ if (!function_exists('eticket_user_registration')) {
     }
 }
 
+if (!function_exists('eticket_admin_registration')) {
+    /**
+     * @param $usersname
+     * @param $email
+     * @param $password
+     * @return mixed|admin id
+     */
+    function eticket_admin_registration( $usersname, $email, $password)
+    {
+        $conn = eticket_get_var('conn');
+        $password = md5($password);
+        $sql = "INSERT INTO " . BUS_BOOKING_TBL_USERS . " (user_name, email_address, password) VALUES ('$usersname', '$email','$password')";
+
+        if (!$conn->query($sql)) {
+            return $conn->error;
+        }
+
+        return $conn->insert_id;
+    }
+}
+
+
 //login function
 if (!function_exists("eticket_login")) {
     /**
@@ -84,4 +106,39 @@ if (!function_exists('eticket_current_user_id')) {
     {
         return eticket_get_var('user_logged_in', $_COOKIE);
     }
+}
+
+if (!function_exists('eticket_get_user')) {
+    /**
+     * Return User data from username or user ID
+     *
+     * @param $username_or_id
+     * @return false
+     */
+    function eticket_get_user($username_or_id = '')
+    {
+
+        $conn = eticket_get_var('conn');
+        $username_or_id = empty($username_or_id) ? eticket_current_user_id() : $username_or_id;
+
+        if (is_numeric($username_or_id)) {
+            $sql = "SELECT * FROM " . BUS_BOOKING_TBL_USERS . " WHERE `id` = '$username_or_id' LIMIT 1";
+        } else {
+            $sql = "SELECT * FROM " . BUS_BOOKING_TBL_USERS . " WHERE `user_name` = '$username_or_id' LIMIT 1";
+        }
+
+        if (!$result = $conn->query($sql)) {
+            return false;
+        }
+
+        return $result->fetch_assoc();
+    }
+}
+
+function eticket_is_user_administrator($user_id_user_name = '')
+{
+    $user_id_user_name = empty($user_id_user_name) ? eticket_current_user_id() : $user_id_user_name;
+    $user_role = eticket_get_var('user_role', eticket_get_user($user_id_user_name));
+
+    return $user_role == 'administrator';
 }

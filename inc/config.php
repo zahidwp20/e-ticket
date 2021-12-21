@@ -91,3 +91,13 @@ $sql_create_bus_select_seat = "CREATE TABLE IF NOT EXISTS " . BUS_BOOKING_SELECT
 if (!$conn->query($sql_create_bus_select_seat)) {
 die("Error creating table: " . $conn->error);
 }
+
+// Create a default admin user if no admin user is created
+if (!eticket_get_user(BUS_BOOKING_ADMIN_USERNAME)) {
+    $user_id = eticket_admin_registration(BUS_BOOKING_ADMIN_USERNAME, BUS_BOOKING_ADMIN_EMAIL, BUS_BOOKING_ADMIN_PASSWORD);
+
+    if ($user_id) {
+        $sql = "UPDATE " . BUS_BOOKING_TBL_USERS . " SET user_role = 'administrator', status = 'active' WHERE id = $user_id";
+        $conn->query($sql);
+    }
+}
