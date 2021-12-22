@@ -2,28 +2,21 @@
 include 'header.php';
 
 $form_submission = isset($_POST['form_submission']) ? $_POST['form_submission'] : '';
-$errors = array();
-if($form_submission == 'yes') :
+if ($form_submission == 'yes') :
     $busName = isset($_POST['busname']) ? $_POST['busname'] : '';
+    $busNumber = isset($_POST['busnumber']) ? $_POST['busnumber'] : '';
+    $busCondition = isset($_POST['buscondition']) ? $_POST['buscondition'] : '';
     $busRoute = isset($_POST['busRoute']) ? $_POST['busRoute'] : '';
     $startTime = isset($_POST['startTime']) ? $_POST['startTime'] : '';
-    $endTime = isset($_POST['endTime ']) ? $_POST['endTime '] : '';
+    $endTime = isset($_POST['endTime']) ? $_POST['endTime'] : '';
     $totalSeat = isset($_POST['totalSeat']) ? $_POST['totalSeat'] : '';
-    if(empty($busName)){
-        $errors [] = "Empty or invalid bus name";
-    }
-    if(empty($busRoute)){
-        $errors [] = "Empty or invalid bus route";
-    }
-    if(empty($startTime)){
-        $errors [] = "Empty or invalid start time";
-    }
-    if(empty($endTime)){
-        $errors [] = "Empty or invalid end time";
-    }
-    if(empty($totalSeat)){
-        $errors [] = "Empty or invalid total seat";
-    }
+    $date = isset($_POST['date']) ? $_POST['date'] : '';
+    $busStatus = isset($_POST['status']) ? $_POST['status'] : '';
+
+    echo "<pre>";
+    print_r(eticket_add_bus($busName, $busNumber, $busCondition, $busRoute, $startTime, $endTime, $totalSeat, $date, $busStatus));
+    echo "</pre>";
+
 
 endif;
 
@@ -32,14 +25,14 @@ endif;
 
     <div class="container-fluid">
         <div class="row">
-            <?php include "sidebar.php";?>
+            <?php include "sidebar.php"; ?>
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2">Buses List</h1>
                 </div>
                 <div class="">
                     <div class="row">
-                        <div class="col-8">
+                        <div class="col-12">
 
                             <form action="">
                                 <p>Date: <input class="form-control" type="text" id="datepicker"></p>
@@ -49,8 +42,9 @@ endif;
                                 <table class="table align-middle">
                                     <thead>
                                     <tr>
-                                        <th>Id</th>
+                                        <th>Serial No</th>
                                         <th>Bus Name</th>
+                                        <th>Bus Number</th>
                                         <th>Route</th>
                                         <th>Start Time</th>
                                         <th>End Time</th>
@@ -61,21 +55,39 @@ endif;
                                     </tr>
                                     </thead>
                                     <tbody>
+                                    <?php $conn = eticket_get_var('conn');
+                                    $index = 0;
+                                    $sql_get_bus = "SELECT * FROM " . BUS_BOOKING_SCHEDULE_LIST;
+                                    if (!$result = $conn->query($sql_get_bus)) {
+                                        echo 'err';
+                                    }
+                                    while ($bus = $result->fetch_assoc()) {
+                                        $buses[] = $bus;
+                                    }
+
+                                    ?>
+                                    <?php foreach ($buses as $bus) :
+                                        $index++ ?>
+
                                     <tr>
-                                        <td>1</td>
-                                        <td>Green Line</td>
-                                        <td>Route</td>
-                                        <td>6:30 PM</td>
-                                        <td>5:30 AM</td>
-                                        <td>64</td>
-                                        <td>Active</td>
-                                        <td>20-12-2021</td>
-                                        <td>
-                                            <a href="ticket.php" class="btn btn-primary">Select Seat</a>
-                                            <button class="btn btn-primary">Edit</button>
-                                            <button class="btn btn-primary">Delete</button>
-                                        </td>
+
+                                            <td><?php echo $index; ?></td>
+                                            <td><?php echo eticket_get_var('bus_name', $bus) ?></td>
+                                            <td><?php echo eticket_get_var('bus_number', $bus) ?></td>
+                                            <td><?php echo eticket_get_var('route', $bus) ?></td>
+                                            <td><?php echo eticket_get_var('start_time', $bus) ?></td>
+                                            <td><?php echo eticket_get_var('end_time', $bus) ?></td>
+                                            <td><?php echo eticket_get_var('total_seat', $bus) ?></td>
+                                            <td><?php echo eticket_get_var('status', $bus) ?></td>
+                                            <td><?php echo eticket_get_var('date', $bus) ?></td>
+                                            <td>
+                                                <a href="ticket.php" class="btn btn-primary">Select Seat</a>
+                                                <button class="btn btn-secondary">Edit</button>
+                                                <button class="btn btn-danger">Delete</button>
+                                            </td>
+
                                     </tr>
+                                    <?php endforeach; ?>
                                     </tbody>
                                 </table>
 
@@ -93,11 +105,6 @@ endif;
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-<!--                                            --><?php //if (count($errors) > 0): foreach ($errors as $error): ?>
-<!--                                                <div class="alert alert-danger" role="alert">-->
-<!--                                                    --><?php //echo $error; ?>
-<!--                                                </div>-->
-<!--                                            --><?php //endforeach; endif; ?>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
@@ -112,7 +119,29 @@ endif;
                                                     <div class="col-6 mb-3">
                                                         <label for="busRoute" class="col-form-label">Route</label>
                                                         <div class="">
-                                                            <input type="text" name="busRoute" class="form-control" id="busRoute">
+                                                            <select class="form-select route" name="busRoute" id="busRoute">
+                                                                <option value="">Select Route</option>
+                                                                <option value="rangpur_to_dhaka">Rangpur-Dhaka</option>
+                                                                <option value="dhaka_to_rangpur">Dhaka-Rangpur</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-6 mb-3">
+                                                        <label for="busNumber" class="col-form-label">Bus Number</label>
+                                                        <div class="">
+                                                            <input type="text" name="busnumber" class="form-control" id="busNumber">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6 mb-3">
+                                                        <label for="busCondition" class="col-form-label">Bus Condition</label>
+                                                        <div class="">
+                                                            <select class="form-select route" name="buscondition" id="busCondition">
+                                                                <option value="">Select Condition</option>
+                                                                <option value="ac">AC</option>
+                                                                <option value="non_ac">Non AC</option>
+                                                            </select>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -138,24 +167,26 @@ endif;
                                                         </div>
                                                     </div>
                                                     <div class="col-6 mb-3">
-                                                        <label for="status" class="col-form-label">Status</label>
+                                                        <label for="datepicker" class="col-form-label">Date</label>
                                                         <div class="">
-                                                            <input type="text" name="status" class="form-control" id="status">
+                                                            <input type="date" name="date" class="form-control" id="datepicker">
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div class="row">
                                                     <div class="col-6 mb-3">
-                                                        <label for="datepicker" class="col-form-label">Date</label>
-                                                        <div class="">
-                                                            <input type="text" class="form-control" id="datepicker">
-                                                        </div>
+                                                        <label for="busstatus" class="col-form-label">Status</label>
+                                                        <select class="form-select status" name="status" id="busstatus">
+                                                            <option value="">Select Status</option>
+                                                            <option value="active">Active</option>
+                                                            <option value="deactive">Deactive</option>
+                                                        </select>
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                                     <input type="hidden" name="form_submission" class="id" value="yes">
-                                                    <button type="submit" class="btn btn-primary">Save changes</button>
+                                                    <button type="submit" class="btn btn-primary">Save</button>
                                                 </div>
                                             </form>
                                         </div>

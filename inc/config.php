@@ -46,14 +46,15 @@ if (!$conn->query($sql_create_tbl_users)) {
 $sql_create_bus_schedule = "CREATE TABLE IF NOT EXISTS " . BUS_BOOKING_SCHEDULE_LIST . " (
     `id` INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     `bus_name` VARCHAR(250) NOT NULL,
-    `bus_number` VARCHAR(50) NOT NULL,
+    `bus_number` VARCHAR(50) UNIQUE NOT NULL,
     `bus_condition` VARCHAR(50) NOT NULL,
-    `holiday` VARCHAR(50) NOT NULL,
+    `holiday` VARCHAR(50),
     `route` VARCHAR(50) NOT NULL,
     `start_time` VARCHAR(50) NOT NULL,
     `end_time` VARCHAR(50) NOT NULL,
-    `date` VARCHAR(50) NOT NULL,
-    `status` tinyint(1) NOT NULL DEFAULT 1 COMMENT '0 = inactive, 1 = active',
+    `total_seat` VARCHAR(50),
+    `date` VARCHAR(50),
+    `status` VARCHAR(255),
     `timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )";
 if (!$conn->query($sql_create_bus_schedule)) {

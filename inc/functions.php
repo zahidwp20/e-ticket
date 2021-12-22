@@ -135,10 +135,88 @@ if (!function_exists('eticket_get_user')) {
     }
 }
 
+if (!function_exists('eticket_get_users')) {
+    /**
+     * Return User data from username
+     *
+     * @return array
+     */
+    function eticket_get_users()
+    {
+
+        $conn = eticket_get_var('conn');
+        $sql = "SELECT * FROM " . BUS_BOOKING_TBL_USERS . " WHERE 1";
+        $users = array();
+
+        if (!$result = $conn->query($sql)) {
+            return array();
+        }
+
+        while ($user = $result->fetch_assoc()) {
+            $users[] = $user;
+        }
+
+        return $users;
+    }
+}
+
 function eticket_is_user_administrator($user_id_user_name = '')
 {
     $user_id_user_name = empty($user_id_user_name) ? eticket_current_user_id() : $user_id_user_name;
     $user_role = eticket_get_var('user_role', eticket_get_user($user_id_user_name));
 
     return $user_role == 'administrator';
+}
+
+if (!function_exists('eticket_get_user_row')) {
+    /**
+     * Return HTML for an user row
+     *
+     * @param $user_id
+     * @return false|string
+     */
+    function eticket_get_user_row($user_id)
+    {
+        $user = eticket_get_user($user_id);
+        $current_user = eticket_get_user(eticket_current_user_id());
+
+        ob_start();
+        ?>
+        <td><?php echo $user_id; ?> <span class="d-none user-name"
+                                          data-user-name="<?php echo eticket_get_var('user_name', $user); ?>"></span></td>
+        <td><?php echo ucwords(eticket_get_var('first_name', $user)) . ' ' . ucwords(eticket_get_var('last_name', $user)); ?></td>
+        <td><?php echo eticket_get_var('user_name', $user); ?></td>
+        <td><?php echo eticket_get_var('email_address', $user); ?></td>
+        <td><?php echo ucwords(eticket_get_var('user_role', $user)); ?></td>
+        <td><?php echo ucwords(eticket_get_var('status', $user)); ?></td>
+        <td>
+            <button type="button" class="btn btn-primary btn-sm view-user-data" data-bs-toggle="modal" data-bs-target="#showViewWindow">View</button>
+
+            <?php if ($user_id != eticket_current_user_id() && eticket_get_var('user_role', $current_user) == 'administrator') : ?>
+
+                <?php if (eticket_get_var('status', $user) == 'pending') : ?>
+                    <a href="" class="btn btn-success btn-sm empm-update-user-status" data-status-target="active">Activate</a>
+                    <a href="" class="btn btn-warning btn-sm empm-update-user-status" data-status-target="deactive">Deactivate</a>
+                <?php elseif (eticket_get_var('status', $user) == 'active') : ?>
+                    <a href="" class="btn btn-warning btn-sm empm-update-user-status" data-status-target="deactive">Deactivate</a>
+                <?php elseif (eticket_get_var('status', $user) == 'deactive') : ?>
+                    <a href="" class="btn btn-success btn-sm empm-update-user-status" data-status-target="active">Activate</a>
+                <?php endif; ?>
+            <?php endif; ?>
+            <button type="button" class="btn btn-secondary btn-sm edit-user-data" data-bs-toggle="modal" data-bs-target="#showEditWindow">Edit
+            </button>
+        </td>
+        <?php
+        return ob_get_clean();
+    }
+}
+
+function eticket_add_bus($busname,$bus_number,$bus_condition,$route,$start_time,$end_time,$total_seat,$date,$status){
+    $conn = eticket_get_var('conn');
+    $sql_add_bus = "INSERT INTO " . BUS_BOOKING_SCHEDULE_LIST . " (bus_name,bus_number,bus_condition,route,start_time,end_time,total_seat,date,status)
+     VALUES('$busname','$bus_number','$bus_condition','$route','$start_time','$end_time','$total_seat','$date','$status')";
+
+    if(!$conn->query($sql_add_bus)){
+        return false;
+    }
 }

@@ -1,14 +1,12 @@
 <?php
 include 'header.php';
 ?>
-    <div id="flip">Add Bus</div>
+    <div id="flip"><button class="btn btn-primary">Add Bus</button></div>
     <div id="panel">
         <h1 class="text-black text-center mb-5">Select your seat</h1>
         <div class="containerbus">
             <!-- Squared ONE -->
             <div class="autobus">
-
-
                 <div class="fila">
                     <div class="seccion">
                         <div class="asiento">
