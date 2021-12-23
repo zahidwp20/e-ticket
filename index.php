@@ -13,9 +13,7 @@ if ($form_submission == 'yes') :
     $date = isset($_POST['date']) ? $_POST['date'] : '';
     $busStatus = isset($_POST['status']) ? $_POST['status'] : '';
 
-    echo "<pre>";
-    print_r(eticket_add_bus($busName, $busNumber, $busCondition, $busRoute, $startTime, $endTime, $totalSeat, $date, $busStatus));
-    echo "</pre>";
+    eticket_add_bus($busName, $busNumber, $busCondition, $busRoute, $startTime, $endTime, $totalSeat, $date, $busStatus);
 
 
 endif;
@@ -55,36 +53,11 @@ endif;
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    <?php $conn = eticket_get_var('conn');
-                                    $index = 0;
-                                    $sql_get_bus = "SELECT * FROM " . BUS_BOOKING_SCHEDULE_LIST;
-                                    if (!$result = $conn->query($sql_get_bus)) {
-                                        echo 'err';
-                                    }
-                                    while ($bus = $result->fetch_assoc()) {
-                                        $buses[] = $bus;
-                                    }
-
+                                    <?php foreach (eticket_get_buses() as $bus) : $bus_id = eticket_get_var('id',$bus);
                                     ?>
-                                    <?php foreach ($buses as $bus) :
-                                        $index++ ?>
 
                                     <tr>
-
-                                            <td><?php echo $index; ?></td>
-                                            <td><?php echo eticket_get_var('bus_name', $bus) ?></td>
-                                            <td><?php echo eticket_get_var('bus_number', $bus) ?></td>
-                                            <td><?php echo eticket_get_var('route', $bus) ?></td>
-                                            <td><?php echo eticket_get_var('start_time', $bus) ?></td>
-                                            <td><?php echo eticket_get_var('end_time', $bus) ?></td>
-                                            <td><?php echo eticket_get_var('total_seat', $bus) ?></td>
-                                            <td><?php echo eticket_get_var('status', $bus) ?></td>
-                                            <td><?php echo eticket_get_var('date', $bus) ?></td>
-                                            <td>
-                                                <a href="ticket.php" class="btn btn-primary">Select Seat</a>
-                                                <button class="btn btn-secondary">Edit</button>
-                                                <button class="btn btn-danger">Delete</button>
-                                            </td>
+                                        <?php echo eticket_get_buses_row($bus_id);?>
 
                                     </tr>
                                     <?php endforeach; ?>

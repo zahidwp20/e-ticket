@@ -20,7 +20,7 @@ if (!function_exists('eticket_get_var')) {
             $args = $_SESSION;
         }
 
-        return isset($args[$key]) ? $args[$key] : '';
+        return isset($args[$key]) ? $args [$key] : '';
     }
 }
 
@@ -203,20 +203,118 @@ if (!function_exists('eticket_get_user_row')) {
                     <a href="" class="btn btn-success btn-sm empm-update-user-status" data-status-target="active">Activate</a>
                 <?php endif; ?>
             <?php endif; ?>
-            <button type="button" class="btn btn-secondary btn-sm edit-user-data" data-bs-toggle="modal" data-bs-target="#showEditWindow">Edit
-            </button>
         </td>
         <?php
         return ob_get_clean();
     }
 }
 
-function eticket_add_bus($busname,$bus_number,$bus_condition,$route,$start_time,$end_time,$total_seat,$date,$status){
-    $conn = eticket_get_var('conn');
-    $sql_add_bus = "INSERT INTO " . BUS_BOOKING_SCHEDULE_LIST . " (bus_name,bus_number,bus_condition,route,start_time,end_time,total_seat,date,status)
+if(!function_exists('eticket_add_bus')) {
+    /**
+     * @param $busname
+     * @param $bus_number
+     * @param $bus_condition
+     * @param $route
+     * @param $start_time
+     * @param $end_time
+     * @param $total_seat
+     * @param $date
+     * @param $status
+     * @return false
+     */
+    function eticket_add_bus($busname, $bus_number, $bus_condition, $route, $start_time, $end_time, $total_seat, $date, $status)
+    {
+        $conn = eticket_get_var('conn');
+        $sql_add_bus = "INSERT INTO " . BUS_BOOKING_SCHEDULE_LIST . " (bus_name,bus_number,bus_condition,route,start_time,end_time,total_seat,date,status)
      VALUES('$busname','$bus_number','$bus_condition','$route','$start_time','$end_time','$total_seat','$date','$status')";
 
-    if(!$conn->query($sql_add_bus)){
-        return false;
+        if (!$conn->query($sql_add_bus)) {
+            return false;
+        }
+    }
+}
+
+if (!function_exists('eticket_get_buses')) {
+    /**
+     * Return User data from username
+     *
+     * @return array
+     */
+    function eticket_get_buses()
+    {
+
+        $conn = eticket_get_var('conn');
+        $sql = "SELECT * FROM " . BUS_BOOKING_SCHEDULE_LIST . " WHERE 1";
+        $buses = array();
+
+        if (!$result = $conn->query($sql)) {
+            return array();
+        }
+
+        while ($bus = $result->fetch_assoc()) {
+            $buses[] = $bus;
+        }
+
+        return $buses;
+    }
+}
+
+if (!function_exists('eticket_get_bus')) {
+    /**
+     * Return User data from username or user ID
+     *
+     * @param $busnumber_or_id
+     * @return false
+     */
+    function eticket_get_bus($busnumber_or_id = '')
+    {
+
+        $conn = eticket_get_var('conn');
+
+        if (is_numeric($busnumber_or_id)) {
+            $sql = "SELECT * FROM " . BUS_BOOKING_SCHEDULE_LIST . " WHERE `id` = '$busnumber_or_id' LIMIT 1";
+        } else {
+            $sql = "SELECT * FROM " . BUS_BOOKING_SCHEDULE_LIST . " WHERE `bus_number` = '$busnumber_or_id' LIMIT 1";
+        }
+
+        if (!$result = $conn->query($sql)) {
+            return false;
+        }
+
+        return $result->fetch_assoc();
+    }
+}
+
+
+if (!function_exists('eticket_get_buses_row')) {
+    /**
+     * Return HTML for an user row
+     *
+     * @param $bus_id
+     * @return false|string
+     */
+    function eticket_get_buses_row($bus_id)
+    {
+        $bus = eticket_get_bus($bus_id);
+
+        ob_start();
+        ?>
+        <td><?php echo eticket_get_var('id', $bus); ?> <span class="d-none user-name"
+                                          data-user-name="<?php echo eticket_get_var('id', $bus); ?>"></span></td>
+        <td><?php echo eticket_get_var('bus_name', $bus) ?></td>
+        <td><?php echo eticket_get_var('bus_number', $bus) ?></td>
+        <td><?php echo eticket_get_var('route', $bus) ?></td>
+        <td><?php echo eticket_get_var('start_time', $bus) ?></td>
+        <td><?php echo eticket_get_var('end_time', $bus) ?></td>
+        <td><?php echo eticket_get_var('total_seat', $bus) ?></td>
+        <td><?php echo eticket_get_var('status', $bus) ?></td>
+        <td><?php echo eticket_get_var('date', $bus) ?></td>
+        <td>
+            <a href="ticket.php" class="btn btn-primary">Select Seat</a>
+            <button class="btn btn-secondary">Edit</button>
+            <button class="btn btn-danger">Delete</button>
+        </td>
+        <?php
+        return ob_get_clean();
     }
 }
