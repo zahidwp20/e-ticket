@@ -222,11 +222,11 @@ if(!function_exists('eticket_add_bus')) {
      * @param $status
      * @return false
      */
-    function eticket_add_bus($busname, $bus_number, $bus_condition, $route, $start_time, $end_time, $total_seat, $date, $status)
+    function eticket_add_bus($busname, $bus_number, $bus_condition,$holiday, $route, $start_time, $end_time, $total_seat, $date, $status)
     {
         $conn = eticket_get_var('conn');
-        $sql_add_bus = "INSERT INTO " . BUS_BOOKING_SCHEDULE_LIST . " (bus_name,bus_number,bus_condition,route,start_time,end_time,total_seat,date,status)
-     VALUES('$busname','$bus_number','$bus_condition','$route','$start_time','$end_time','$total_seat','$date','$status')";
+        $sql_add_bus = "INSERT INTO " . BUS_BOOKING_SCHEDULE_LIST . " (bus_name,bus_number,bus_condition,holiday,route,start_time,end_time,total_seat,date,status)
+     VALUES('$busname','$bus_number','$bus_condition','$holiday','$route','$start_time','$end_time','$total_seat','$date','$status')";
 
         if (!$conn->query($sql_add_bus)) {
             return false;
@@ -304,15 +304,19 @@ if (!function_exists('eticket_get_buses_row')) {
         <td><?php echo eticket_get_var('bus_name', $bus) ?></td>
         <td><?php echo eticket_get_var('bus_number', $bus) ?></td>
         <td><?php echo eticket_get_var('route', $bus) ?></td>
+        <td><?php echo eticket_get_var('bus_condition', $bus) ?></td>
         <td><?php echo eticket_get_var('start_time', $bus) ?></td>
         <td><?php echo eticket_get_var('end_time', $bus) ?></td>
         <td><?php echo eticket_get_var('total_seat', $bus) ?></td>
         <td><?php echo eticket_get_var('status', $bus) ?></td>
+        <td><?php echo eticket_get_var('holiday', $bus) ?></td>
         <td><?php echo eticket_get_var('date', $bus) ?></td>
         <td>
             <a href="ticket.php" class="btn btn-primary">Select Seat</a>
-            <button class="btn btn-secondary">Edit</button>
-            <button class="btn btn-danger">Delete</button>
+        <?php if (eticket_is_user_administrator()) : ?>
+        <button class="btn btn-secondary">Edit</button>
+        <button class="btn btn-danger">Delete</button>
+        <?php endif; ?>
         </td>
         <?php
         return ob_get_clean();
